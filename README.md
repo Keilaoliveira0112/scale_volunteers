@@ -49,5 +49,8 @@ src/
 * Testes com Jest ou Insomnia/Postman.
 * Documentação com Swagger.
 
+### 📌 Organização do projeto e etapas
+🔗 [TRELLO](https://trello.com/invite/b/6834ec83337d865feb1f2d60/ATTI20b18ce5cf8b767e6efaf12994aeb42c04807B3D/app-scale-volunteers)
+
 ---
 
