@@ -1,66 +1,72 @@
-const { PrismaClient } = require('../generated/prisma');
-const { hashSenha, compararSenha } = require('../utils/hash');
+// src/controllers/authController.js
 const jwt = require('jsonwebtoken');
-
+const bcrypt = require('bcryptjs');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const JWT_SECRET = 'sua_chave_secreta'; // ideal usar process.env
+const { createUsuario } = require('./usuarioController');
+const SECRET = process.env.JWT_SECRET;
 
-exports.register = async (req, res) => {
-  const { nome, email, senha, tipo } = req.body;
 
+const register = async (req, res) => {
+  return createUsuario(req, res);
+};
+
+const getUsuarioAutenticado = async (req, res) => {
   try {
-    const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
-
-    if (usuarioExistente) {
-      return res.status(400).json({ mensagem: 'E-mail já registrado' });
-    }
-
-    const senhaHash = await hashSenha(senha);
-
-    const novoUsuario = await prisma.usuario.create({
-      data: {
-        nome,
-        email,
-        senhaHash,
-        tipo,
-      },
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuario.id },
+      select: { id: true, nome: true, email: true, tipo: true }
     });
 
-    res.status(201).json({ mensagem: 'Usuário criado com sucesso', usuario: novoUsuario });
-  } catch (erro) {
-    res.status(500).json({ mensagem: 'Erro ao registrar', erro: erro.message });
+    if (!usuario) {
+      return res.status(404).json({ mensagem: 'Usuário não encontrado' });
+    }
+
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro ao buscar usuário autenticado' });
   }
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   const { email, senha } = req.body;
 
   try {
     const usuario = await prisma.usuario.findUnique({ where: { email } });
 
     if (!usuario) {
-      return res.status(401).json({ mensagem: 'Usuário não encontrado' });
+      return res.status(404).json({ mensagem: 'Usuário não encontrado' });
     }
 
-    const senhaCorreta = await compararSenha(senha, usuario.senhaHash);
+    const senhaCorreta = await bcrypt.compare(senha, usuario.senhaHash);
 
     if (!senhaCorreta) {
       return res.status(401).json({ mensagem: 'Senha incorreta' });
     }
 
-    const token = jwt.sign({ id: usuario.id, email: usuario.email }, JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ id: usuario.id, email: usuario.email }, SECRET, {
+      expiresIn: '1d',
+    });
 
-    res.status(200).json({ mensagem: 'Login bem-sucedido', token });
+    res.status(200).json({
+      mensagem: 'Login realizado com sucesso!',
+      token,
+    });
   } catch (erro) {
-    res.status(500).json({ mensagem: 'Erro ao fazer login', erro: erro.message });
-}}
-
-exports.getUsuarioAutenticado = async (req, res) => {
-  try {
-    res.status(200).json({ usuario: req.usuario });
-  } catch (erro) {
-    res.status(500).json({ mensagem: 'Erro ao buscar usuário', erro: erro.message });
+    res.status(500).json({ mensagem: 'Erro ao fazer login', erro });
   }
+};
+
+
+exports.register = (req, res) => {
+  res.status(200).json({ mensagem: 'Usuário registrado com sucesso!' });
+};
+
+
+module.exports = {
+  getUsuarioAutenticado,
+  login,
+  register,
 };
 
 

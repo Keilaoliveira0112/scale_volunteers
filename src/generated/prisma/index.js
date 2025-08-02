@@ -162,8 +162,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Usuario {\n  id        Int    @id @default(autoincrement())\n  nome      String\n  email     String @unique\n  senhaHash String\n  tipo      String // 'admin' ou 'voluntario'\n}\n",
-  "inlineSchemaHash": "5b840e049f49ed267e3bdac38d84773ad2c242c447095409a34c8c914f8ea01b",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Usuario {\n  id        Int    @id @default(autoincrement())\n  nome      String\n  email     String @unique\n  senhaHash String\n  tipo      String\n}\n",
+  "inlineSchemaHash": "6ce8dc8730e1abec6ea5f8c031824541e6dc13fe2938b555d36b64e7ada1c061",
   "copyEngine": true
 }
 
