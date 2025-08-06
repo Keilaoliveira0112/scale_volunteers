@@ -37,6 +37,8 @@ const getUsuarios = async (req, res) => {
 // ✅ GET ONE BY ID
 const getUsuarioById = async (req, res) => {
   try {
+    console.log('ID recebido:', req.params.id);
+
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: 'ID inválido.' });
 
