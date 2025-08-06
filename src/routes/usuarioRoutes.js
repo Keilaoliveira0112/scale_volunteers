@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/authMiddleware');
 const usuarioController = require('../controllers/usuarioController');
 
 // POST - Criar usuário
@@ -16,5 +17,7 @@ router.put('/:id', usuarioController.updateUsuario);
 
 // DELETE - Excluir usuário por ID
 router.delete('/:id', usuarioController.deleteUsuario);
+
+router.get('/:id', authMiddleware, usuarioController.getUsuarioById);
 
 module.exports = router;
