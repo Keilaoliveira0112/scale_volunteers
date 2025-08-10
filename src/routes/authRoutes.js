@@ -1,19 +1,20 @@
+// src/routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
 
 const authController = require('../controllers/authController');
-const verificarToken = require('../middleware/authMiddleware');
 const usuarioController = require('../controllers/usuarioController');
+const verificarToken = require('../middleware/authMiddleware');
 
-
+// Rotas de autenticação
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.get('/me', verificarToken, authController.getUsuarioAutenticado);
-router.get('/', usuarioController.getUsuarios);
-router.get('/:id', usuarioController.getUsuarioById);
-router.put('/:id', usuarioController.updateUsuario);
-router.delete('/:id', usuarioController.deleteUsuario);
 
-
+// Rotas de usuários (protegidas)
+router.get('/', verificarToken, usuarioController.getUsuarios);
+router.get('/:id', verificarToken, usuarioController.getUsuarioById);
+router.put('/:id', verificarToken, usuarioController.updateUsuario);
+router.delete('/:id', verificarToken, usuarioController.deleteUsuario);
 
 module.exports = router;

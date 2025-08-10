@@ -3,36 +3,37 @@ const prisma = new PrismaClient();
 
 // ✅ CREATE
 const createUsuario = async (req, res) => {
-  try {
-    const { nome, email, senhaHash, tipo } = req.body;
+  
+    const { nome, email, senha, tipo } = req.body;
 
-    // Validação simples
-    if (!nome || !email || !senhaHash || !tipo) {
-      return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
-    }
+  try {
+    const senhaHash = await bcrypt.hash(senha, 10); // 🔒 criptografa a senha
 
     const novoUsuario = await prisma.usuario.create({
-      data: { nome, email, senhaHash, tipo },
+      data: {
+        nome,
+        email,
+        senhaHash, // salva já criptografado
+        tipo
+      }
     });
 
     return res.status(201).json(novoUsuario);
   } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'E-mail já está em uso.' });
-    }
-    return res.status(500).json({ error: 'Erro ao criar usuário.', details: error.message });
+    return res.status(500).json({ mensagem: 'Erro ao cadastrar usuário', erro: error.message });
   }
 };
 
+
 // ✅ GET ALL
-const getUsuarios = async (req, res) => {
-  try {
-    const usuarios = await prisma.usuario.findMany();
-    return res.status(200).json(usuarios);
-  } catch (error) {
-    return res.status(500).json({ error: 'Erro ao buscar usuários.', details: error.message });
-  }
-};
+async function getUsuarios(req, res) {
+    try {
+        const usuarios = await prisma.usuario.findMany();
+        return res.status(200).json(usuarios);
+    } catch (error) {
+        return res.status(500).json({ error: 'Erro ao buscar usuários.', details: error.message });
+    }
+}
 
 // ✅ GET ONE BY ID
 const getUsuarioById = async (req, res) => {
