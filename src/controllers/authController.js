@@ -1,16 +1,13 @@
 // src/controllers/authController.js
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
+
 const prisma = new PrismaClient();
-const { createUsuario } = require('./usuarioController');
-const SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-
-const register = async (req, res) => {
-  return createUsuario(req, res);
-};
-
+// Buscar dados do usuário autenticado
 const getUsuarioAutenticado = async (req, res) => {
   try {
     const usuario = await prisma.usuario.findUnique({
@@ -28,9 +25,10 @@ const getUsuarioAutenticado = async (req, res) => {
   }
 };
 
+// Login
 const login = async (req, res) => {
   const { email, senha } = req.body;
-
+   
   try {
     const usuario = await prisma.usuario.findUnique({ where: { email } });
 
@@ -39,41 +37,51 @@ const login = async (req, res) => {
     }
 
     const senhaCorreta = await bcrypt.compare(senha, usuario.senhaHash);
-
+    console.log(senhaCorreta);
     if (!senhaCorreta) {
-      return res.status(401).json({ mensagem: 'Senha incorreta' });
+        console.log(senhaCorreta);
+    return res.status(401).json({ mensagem: 'Senha incorreta' });
     }
-
-    const token = jwt.sign({ id: usuario.id, email: usuario.email }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
-    });
+    
+    const token = jwt.sign(
+      { id: usuario.id, email: usuario.email },
+      JWT_SECRET,
+      { expiresIn: '1d' }
+    );
 
     res.status(200).json({
       mensagem: 'Login realizado com sucesso!',
-      token,
+      token
     });
   } catch (erro) {
     res.status(500).json({ mensagem: 'Erro ao fazer login', erro });
   }
 };
 
-
-exports.register = async (req, res) => {
+// Registro
+const register = async (req, res) => {
   const { nome, email, senha, tipo } = req.body;
 
   try {
-    const senhaHash = await bcrypt.hash(senha, 10);
+    const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
+    if (usuarioExistente) {
+      return res.status(400).json({ mensagem: 'E-mail já cadastrado' });
+    }
 
-    const usuario = await prisma.usuario.create({
-      data: {
-        nome,
-        email,
-        senhaHash,
-        tipo,
-      },
+    const senhaHash = await bcrypt.hash(senha, 10);
+    const novoUsuario = await prisma.usuario.create({
+      data: { nome, email, senhaHash, tipo }
     });
 
-    res.status(201).json({ mensagem: 'Usuário registrado com sucesso!', usuario });
+    res.status(201).json({
+      mensagem: 'Usuário registrado com sucesso!',
+      usuario: {
+        id: novoUsuario.id,
+        nome: novoUsuario.nome,
+        email: novoUsuario.email,
+        tipo: novoUsuario.tipo
+      }
+    });
   } catch (erro) {
     res.status(500).json({ mensagem: 'Erro ao registrar usuário', erro });
   }
@@ -82,7 +90,5 @@ exports.register = async (req, res) => {
 module.exports = {
   getUsuarioAutenticado,
   login,
-  register,
+  register
 };
-
-
