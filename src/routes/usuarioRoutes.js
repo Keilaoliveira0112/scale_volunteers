@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
+const verificarToken = require('../middleware/authMiddleware');
 const usuarioController = require('../controllers/usuarioController');
+const authController = require('../controllers/authController');
+
+
+// Rota protegida
+router.get('/perfil', verificarToken, authController.getUsuarioAutenticado);
 
 // POST - Criar usuário
 router.post('/', usuarioController.createUsuario);
@@ -17,7 +22,5 @@ router.put('/:id', usuarioController.updateUsuario);
 
 // DELETE - Excluir usuário por ID
 router.delete('/:id', usuarioController.deleteUsuario);
-
-router.get('/:id', authMiddleware, usuarioController.getUsuarioById);
 
 module.exports = router;
