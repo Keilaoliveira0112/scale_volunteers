@@ -4,6 +4,7 @@ const app = require('./src/app');
 const authRoutes = require('./src/routes/authRoutes'); 
 const PORT = process.env.PORT || 3000;
 
+
 app.use(express.json());
 
 // Rotas
