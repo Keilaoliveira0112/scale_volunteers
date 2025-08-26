@@ -1,7 +1,31 @@
 📜 Regras de Negócio - Sistema de Gestão de Voluntários
+
+Apenas Administradores Podem Listar Usuários
+
+- **Descrição:** Apenas usuários com a role `ADMIN` podem acessar a rota de listagem de usuários.
+
+- **Rota:** `GET /admin/listar-usuarios`
+- **Middleware:** `verificarToken`, `authorizeAdmin`
+- **Resposta de Erro:**
+  - `403`: Caso o usuário não seja administrador.
+  - `401`: Caso o token seja inválido ou ausente.
+  
+- **Objetivo:** Garantir que apenas administradores gerenciem contas.
+
 🔹 Usuário
+- O e-mail do usuário deve ser **único** no sistema. 
+
+- A senha deve ter **mínimo de 8 caracteres**. - O nome é **obrigatório**. 
+
+- O usuário só pode ser criado com uma conta de **e-mail válido**
 
 Um Usuário pode ter um ou mais papéis (ADMIN, LIDER, VOLUNTARIO).
+
+Autenticação 
+
+- Apenas usuários cadastrados podem acessar rotas protegidas. 
+
+- O token JWT tem validade de **1 hora**.
 
 Usuário do tipo ADMIN pode:
 
