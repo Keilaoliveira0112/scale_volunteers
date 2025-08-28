@@ -43,9 +43,9 @@ src/
 
 ### 📌 Próximos Passos
 
-* Implementar login e autenticação com JWT.
-* Adicionar validação de inputs.
-* Criar middleware de autorização.
+* Implementar login e autenticação com JWT.✅
+* Adicionar validação de inputs.✅
+* Criar middleware de autorização.✅
 * Testes com Jest ou Insomnia/Postman.
 * Documentação com Swagger.
 
