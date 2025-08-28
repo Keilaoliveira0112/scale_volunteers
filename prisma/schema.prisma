@@ -56,7 +56,7 @@ model Escala {
 }
 
 enum Role {
-  ADMIN
-  LIDER
-  VOLUNTARIO
+  admin
+  lider
+  voluntario
 }
