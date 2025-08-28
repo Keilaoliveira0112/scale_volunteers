@@ -20,7 +20,7 @@ const verificarToken = (req, res, next) => {
 
 // 🔥 AQUI estava errado, estava checando role. Vamos usar tipo.
 function verificarAdmin(req, res, next) {
-  if (req.usuario?.tipo !== 'admin') {
+  if (req.usuario?.role !== 'admin') {
     return res.status(403).json({ message: 'Acesso negado. Apenas administradores.' });
   }
   next();

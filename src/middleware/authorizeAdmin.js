@@ -1,6 +1,6 @@
 module.exports = function authorizeAdmin(req, res, next) {
   try {
-    if (req.usuario && req.usuario.tipo === 'admin') {
+    if (req.usuario && req.usuario.role === 'admin') {
       return next();
     }
     return res.status(403).json({ message: 'Acesso negado: Apenas administradores podem acessar esta rota.' });
