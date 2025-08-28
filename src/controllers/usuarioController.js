@@ -97,10 +97,31 @@ const deleteUsuario = async (req, res) => {
   }
 };
 
+const getPerfil = async (req, res) => {
+  try {
+    // Aqui você acessa o ID do usuário que veio do token
+    const userId = req.userId;
+    res.json({ message: `Bem-vindo ao seu perfil! Seu ID é ${userId}` });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao carregar o perfil.' });
+  }
+};
+
+const listarUsuarios = async (req, res) => {
+  try {
+    const usuarios = await prisma.usuario.findMany();
+    return res.status(200).json(usuarios);
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro ao listar usuários.', details: error.message });
+  }
+};
+
 module.exports = {
   createUsuario,
   getUsuarios,
   getUsuarioById,
   updateUsuario,
   deleteUsuario,
+  getPerfil,
+  listarUsuarios,
 };

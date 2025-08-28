@@ -4,7 +4,7 @@ const router = express.Router();
 
 const authController = require('../controllers/authController');
 const usuarioController = require('../controllers/usuarioController');
-const verificarToken = require('../middleware/authMiddleware');
+const { verificarToken } = require('../middleware/authMiddleware');
 
 // Rotas de autenticação
 router.post('/register', authController.register);

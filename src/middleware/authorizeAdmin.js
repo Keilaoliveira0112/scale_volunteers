@@ -1,7 +1,6 @@
-// src/middleware/authorizeAdmin.js
 module.exports = function authorizeAdmin(req, res, next) {
   try {
-    if (req.user && req.user.role === 'ADMIN') {
+    if (req.usuario && req.usuario.tipo === 'admin') {
       return next();
     }
     return res.status(403).json({ message: 'Acesso negado: Apenas administradores podem acessar esta rota.' });
