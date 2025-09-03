@@ -8,6 +8,7 @@ require('dotenv').config();
 const protectedRoutes = require('./routes/protectedRoutes');
 const authRoutes = require('./routes/authRoutes');
 const usuarioRoutes = require('./routes/usuarioRoutes');
+const ministerioRoutes = require('./routes/ministerioRoutes');
 
 app.use(cors());
 app.use(express.json());
@@ -22,6 +23,8 @@ app.get('/', (req, res) => {
 
 // Rotas protegidas
 app.use('/api', protectedRoutes);
+
+app.use('/ministerios', ministerioRoutes);
 
 
 module.exports = app;
