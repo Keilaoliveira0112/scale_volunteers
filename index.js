@@ -3,6 +3,7 @@ const express = require('express');
 const app = require('./src/app'); 
 const authRoutes = require('./src/routes/authRoutes'); 
 const protectedRoutes = require('./src/routes/protectedRoutes');
+const ministerioRoutes = require('./src/routes/ministerioRoutes');
 const PORT = process.env.PORT || 3000;
 
 
@@ -17,6 +18,8 @@ app.use('/api', protectedRoutes);
 const adminRoutes = require('./src/routes/adminRoutes');
 app.use('/admin', adminRoutes);
 
+// Monta as rotas de ministérios
+app.use('/ministerios', ministerioRoutes);
 
 // const usuarioRoutes = require('./src/routes/usuarioRoutes');
 // app.use('/usuarios', usuarioRoutes);

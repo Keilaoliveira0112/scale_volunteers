@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function criarEscala(data, usuario) {
   // Regra 1: só admin ou líder pode criar
-  if (usuario.role !== "ADMIN" && usuario.role !== "LIDER") {
+  if (usuario.role !== "admin" && usuario.role !== "lider") {
     throw new Error("Apenas admin ou líder podem criar escalas");
   }
 

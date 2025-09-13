@@ -74,7 +74,7 @@ const validarConflitoEscala = async (req, res, next) => {
  */
 const validarPermissaoSubstituicao = (req, res, next) => {
   const { usuario } = req; // supondo que vem do token JWT
-  if (usuario.role !== 'ADMIN' && usuario.role !== 'LIDER') {
+  if (usuario.role !== 'admin' && usuario.role !== 'lider') {
     return res.status(403).json({
       error: 'Apenas líderes ou administradores podem gerenciar substituições.',
     });
@@ -87,7 +87,7 @@ const validarPermissaoSubstituicao = (req, res, next) => {
  */
 const validarPermissaoCriarMinisterio = (req, res, next) => {
   const { usuario } = req; // vem do JWT
-  if (usuario.role !== 'ADMIN') {
+  if (usuario.role !== 'admin') {
     return res.status(403).json({
       error: 'Apenas administradores podem criar ministérios.',
     });

@@ -1,25 +1,33 @@
+// src/controllers/ministerioController.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const adicionarVoluntario = async (req, res) => {
+exports.adicionarVoluntario = async (req, res) => {
   try {
-    const { voluntarioId, ministerioId } = req.body;
+    const { usuarioId, ministerioId } = req.body;
 
-    const novoVinculo = await prisma.ministerioVoluntario.create({
-      data: {
-        voluntarioId,
-        ministerioId,
+    // Verifica se já existe esse vínculo
+    const existe = await prisma.voluntarioMinisterio.findUnique({
+      where: {
+        usuarioId_ministerioId: {
+          usuarioId,
+          ministerioId,
+        },
       },
     });
 
-    res.status(201).json({
-      mensagem: "Voluntário adicionado ao ministério com sucesso!",
-      vinculo: novoVinculo,
+    if (existe) {
+      return res.status(400).json({ mensagem: 'Voluntário já está nesse ministério' });
+    }
+
+    // Cria o vínculo
+    const novoVinculo = await prisma.voluntarioMinisterio.create({
+      data: { usuarioId, ministerioId },
     });
+
+    res.status(201).json({ mensagem: 'Voluntário adicionado com sucesso', novoVinculo });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ mensagem: "Erro ao adicionar voluntário" });
+    res.status(500).json({ mensagem: 'Erro ao adicionar voluntário', erro: error.message });
   }
 };
-
-module.exports = { adicionarVoluntario };
