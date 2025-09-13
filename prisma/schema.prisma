@@ -28,7 +28,7 @@ model Ministerio {
   nome      String
   descricao String?
   liderId   Int
-  Usuario? @relation(fields: [liderId], references: [id])
+  lider Usuario @relation("LiderMinisterio", fields: [liderId], references: [id])
 
   // Voluntários nesse ministério
   usuarios UsuarioMinisterio[]
