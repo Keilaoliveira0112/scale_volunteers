@@ -1,30 +1,32 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const verificarToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // pega depois do "Bearer"
+function verificarToken(req, res, next) {
+  const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+  let token = authHeader && authHeader.split(' ')[1];
 
-  if (!token) {
-    return res.status(401).json({ mensagem: "Acesso negado! Token não fornecido." });
-  }
+  // remover aspas acidentais
+  if (typeof token === 'string') token = token.replace(/^"|"$/g, '');
+
+  if (!token) return res.status(401).json({ mensagem: 'Token ausente.' });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.usuario = decoded; // salva no req para usar depois
-    next();
-  } catch (error) {
-    console.error("Erro JWT:", error.message);
-    return res.status(401).json({ mensagem: "Token inválido ou expirado." });
-  }
-};
 
-// 🔥 AQUI estava errado, estava checando role. Vamos usar tipo.
-function verificarAdmin(req, res, next) {
-  if (req.usuario?.role !== 'admin') {
-    return res.status(403).json({ message: 'Acesso negado. Apenas administradores.' });
+    // garantir campos disponíveis no req
+    const tipo = (decoded.tipo || decoded.role || '').toString().toLowerCase();
+    req.usuario = {
+      id: decoded.id,
+      email: decoded.email,
+      tipo,
+      role: tipo
+    };
+
+    return next();
+  } catch (err) {
+    console.error('JWT verify error:', err.message);
+    return res.status(401).json({ mensagem: 'Token inválido ou expirado.' });
   }
-  next();
 }
 
-module.exports = { verificarToken, verificarAdmin };
+module.exports = { verificarToken };

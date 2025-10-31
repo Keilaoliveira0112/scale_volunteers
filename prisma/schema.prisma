@@ -8,43 +8,55 @@ datasource db {
 }
 
 model Usuario {
-  id        Int    @id @default(autoincrement())
-  nome      String
-  email     String @unique
-  senhaHash String
-  tipo      Role
+  id           Int                 @id @default(autoincrement())
+  nome         String
+  email        String              @unique
+  senhaHash    String
+  tipo         Role
+  criadoEm     DateTime            @default(now())
+  atualizadoEm DateTime            @updatedAt @default(now())
 
-  // Ministérios que o usuário lidera
-  ministeriosLiderados Ministerio[] @relation("LiderMinisterio")
-
-  // Ministérios que o usuário participa como voluntário
-  ministerios UsuarioMinisterio[]
-
-  escalas Escala[]
+  // Relações
+  ministeriosLiderados Ministerio[]     @relation("LiderMinisterio")
+  ministerios          UsuarioMinisterio[]
+  escalas              EscalaVoluntario[]
 }
 
+// ...existing code...
+
 model Ministerio {
-  id        Int     @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   nome      String
   descricao String?
   liderId   Int
-  lider Usuario @relation("LiderMinisterio", fields: [liderId], references: [id])
+  lider     Usuario @relation("LiderMinisterio", fields: [liderId], references: [id])
 
   // Voluntários nesse ministério
   usuarios UsuarioMinisterio[]
 
   escalas Escala[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
+enum MembershipStatus {
+  PENDENTE
+  APROVADO
+  REJEITADO
 }
 
 model UsuarioMinisterio {
   id           Int @id @default(autoincrement())
   usuarioId    Int
   ministerioId Int
+  status       MembershipStatus @default(PENDENTE)
+  criadoEm     DateTime @default(now())
 
   usuario    Usuario    @relation(fields: [usuarioId], references: [id])
   ministerio Ministerio @relation(fields: [ministerioId], references: [id])
 
-  @@unique([usuarioId, ministerioId]) // Evita duplicação
+  @@unique([usuarioId, ministerioId])
 }
 
 model Escala {
@@ -52,7 +64,24 @@ model Escala {
   dataHora     DateTime
   ministerioId Int
   ministerio   Ministerio @relation(fields: [ministerioId], references: [id])
-  voluntarios  Usuario[]
+  voluntarios  EscalaVoluntario[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
+model EscalaVoluntario {
+  id               Int      @id @default(autoincrement())
+  escalaId         Int
+  voluntarioId     Int
+  presenteConfirmado Boolean @default(false)
+
+  escala     Escala   @relation(fields: [escalaId], references: [id])
+  voluntario Usuario  @relation(fields: [voluntarioId], references: [id])
+
+  criadoEm DateTime @default(now())
+
+  @@unique([escalaId, voluntarioId])
 }
 
 enum Role {
