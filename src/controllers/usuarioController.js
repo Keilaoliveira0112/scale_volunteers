@@ -107,21 +107,15 @@ const getPerfil = async (req, res) => {
   }
 };
 
-const listarUsuarios = async (req, res) => {
-  try {
-    const usuarios = await prisma.usuario.findMany();
-    return res.status(200).json(usuarios);
-  } catch (error) {
-    return res.status(500).json({ error: 'Erro ao listar usuários.', details: error.message });
-  }
-};
+// Após a função getUsuarios, adicione um alias
+const listarUsuarios = getUsuarios;
 
 module.exports = {
   createUsuario,
   getUsuarios,
+  listarUsuarios, // <- exporta o alias
   getUsuarioById,
   updateUsuario,
   deleteUsuario,
   getPerfil,
-  listarUsuarios,
 };

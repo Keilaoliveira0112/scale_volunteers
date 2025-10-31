@@ -9,22 +9,24 @@ const protectedRoutes = require('./routes/protectedRoutes');
 const authRoutes = require('./routes/authRoutes');
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const ministerioRoutes = require('./routes/ministerioRoutes');
+const voluntarioRoutes = require('./routes/voluntarioRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // << adicionar se faltar
 
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
-app.use('/auth', authRoutes);
-app.use('/usuarios', usuarioRoutes); 
-// app.use('/api/usuarios', usuarioRoutes); prefixado para uma organização futura
-
-app.get('/', (req, res) => {
-  res.send('API Scale Volunteers rodando!');
+// debug: log de requisições (remova depois)
+app.use((req, res, next) => {
+  console.log('REQ', req.method, req.path);
+  next();
 });
 
-// Rotas protegidas
-app.use('/api', protectedRoutes);
-
+// montar rotas
+app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);               // << aqui
 app.use('/ministerios', ministerioRoutes);
-
+app.use('/voluntario', voluntarioRoutes);
+app.use('/usuarios', usuarioRoutes);
+app.use('/protected', protectedRoutes);
 
 module.exports = app;

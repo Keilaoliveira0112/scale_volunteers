@@ -1,30 +1,34 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const verificarLimiteMinisterios = async (req, res, next) => {
+module.exports = async function verificarLimiteMinisterios(req, res, next) {
   try {
-    const { voluntarioId } = req.body;
-
-    if (!voluntarioId) {
-      return res.status(400).json({ mensagem: "voluntarioId é obrigatório" });
+    // obtém ministerioId de body ou params
+    const ministerioId = Number(req.body.ministerioId ?? req.params.ministerioId);
+    if (!ministerioId || Number.isNaN(ministerioId)) {
+      return res.status(400).json({ mensagem: 'ministerioId inválido ou ausente.' });
     }
 
-    // Contar quantos ministérios esse voluntário já participa
-    const ministeriosDoVoluntario = await prisma.ministerioVoluntario.count({
-      where: { voluntarioId },
+    // opcional: validar voluntarioId também se necessário
+    const voluntarioId = Number(req.body.voluntarioId ?? req.body.usuarioId);
+    if (!voluntarioId || Number.isNaN(voluntarioId)) {
+      return res.status(400).json({ mensagem: 'voluntarioId inválido ou ausente.' });
+    }
+
+    // conta voluntários já vinculados ao ministério
+    const total = await prisma.usuarioMinisterio.count({
+      where: { ministerioId: ministerioId },
     });
 
-    if (ministeriosDoVoluntario >= 2) {
-      return res.status(400).json({
-        mensagem: "Este voluntário já está em 2 ministérios e não pode ser adicionado a mais.",
-      });
+    const LIMITE = Number(process.env.LIMITE_VOLUNTARIOS_POR_MINISTERIO ?? 50); // ajuste
+    if (total >= LIMITE) {
+      return res.status(400).json({ mensagem: 'Limite de voluntários neste ministério atingido.' });
     }
 
-    next(); // segue para a próxima função (controller)
+    // tudo ok
+    next();
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensagem: "Erro no servidor" });
+    console.error('Erro em verificarLimiteMinisterios:', error);
+    return res.status(500).json({ mensagem: 'Erro interno ao verificar limite de ministério.', detalhe: error.message });
   }
 };
-
-module.exports = verificarLimiteMinisterios;
