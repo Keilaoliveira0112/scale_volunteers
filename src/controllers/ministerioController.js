@@ -81,59 +81,76 @@ exports.atribuirLider = async (req, res) => {
   }
 };
 
+exports.adicionarVoluntario = async (req, res) => {
+  try {
+    const ministerioId = Number(req.params.id);
+    const voluntarioId = Number(req.body?.voluntarioId ?? req.query?.voluntarioId);
+    console.log('adicionarVoluntario called', { ministerioId, voluntarioId, usuario: req.usuario });
+
+    if (!ministerioId || !voluntarioId || Number.isNaN(ministerioId) || Number.isNaN(voluntarioId)) {
+      return res.status(400).json({ mensagem: 'ministerioId (params) e voluntarioId (body ou query) são obrigatórios e numéricos.' });
+    }
+
+    // verificar existência
+    const [usuario, ministerio] = await Promise.all([
+      prisma.usuario.findUnique({ where: { id: voluntarioId } }),
+      prisma.ministerio.findUnique({ where: { id: ministerioId } })
+    ]);
+    if (!usuario) return res.status(404).json({ mensagem: 'Voluntário não encontrado.' });
+    if (!ministerio) return res.status(404).json({ mensagem: 'Ministério não encontrado.' });
+
+    // contar ministérios APROVADOS do usuário (fallback se não existir campo status)
+    let totalAprovados = 0;
+    try {
+      totalAprovados = await prisma.usuarioMinisterio.count({ where: { usuarioId: voluntarioId, status: 'APROVADO' } });
+    } catch (e) {
+      totalAprovados = await prisma.usuarioMinisterio.count({ where: { usuarioId: voluntarioId } });
+    }
+    if (totalAprovados >= 2) return res.status(400).json({ mensagem: 'Voluntário já participa de 2 ministérios aprovados.' });
+
+    // cria ou atualiza vínculo
+    const existente = await prisma.usuarioMinisterio.findFirst({ where: { usuarioId: voluntarioId, ministerioId } });
+    if (existente) {
+      if ('status' in existente) {
+        const atualizado = await prisma.usuarioMinisterio.update({ where: { id: existente.id }, data: { status: 'APROVADO' } });
+        return res.status(200).json(atualizado);
+      }
+      return res.status(200).json({ mensagem: 'Vínculo já existe.' });
+    }
+
+    const criado = await prisma.usuarioMinisterio.create({
+      data: { usuarioId: voluntarioId, ministerioId, status: 'APROVADO' } // Prisma ignora campo se não existir no schema
+    });
+    return res.status(201).json(criado);
+  } catch (error) {
+    console.error('adicionarVoluntario - erro:', error);
+    if (error.code === 'P2003') return res.status(404).json({ mensagem: 'FK violation: usuário ou ministério não existe.' });
+    if (error.code === 'P2002') return res.status(200).json({ mensagem: 'Vínculo já existe (unicidade).' });
+    return res.status(500).json({ mensagem: 'Erro ao adicionar voluntário.', detalhe: error.message });
+  }
+};
+
 // Remover ministério — bloqueia se houver escalas ativas (dataHora >= agora)
 exports.removerMinisterio = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (!id) return res.status(400).json({ mensagem: 'ID do ministério obrigatório.' });
+    if (!id || Number.isNaN(id)) return res.status(400).json({ mensagem: 'ID do ministério obrigatório.' });
 
     const now = new Date();
-
     const escalasAtivas = await prisma.escala.count({
-      where: {
-        ministerioId: id,
-        dataHora: { gte: now }
-      }
+      where: { ministerioId: id, dataHora: { gte: now } }
     });
-
     if (escalasAtivas > 0) {
       return res.status(400).json({ mensagem: 'Não é possível excluir: existem escalas ativas vinculadas ao ministério.' });
     }
 
-    // opcional: remover vínculos UsuarioMinisterio antes de deletar (ou deixar FK cascade conforme schema)
     await prisma.usuarioMinisterio.deleteMany({ where: { ministerioId: id } });
-
     await prisma.ministerio.delete({ where: { id } });
+
     return res.json({ mensagem: 'Ministério removido.' });
   } catch (error) {
     console.error('removerMinisterio:', error);
-    return res.status(500).json({ mensagem: 'Erro ao remover ministério.' });
-  }
-};
-
-exports.adicionarVoluntario = async (req, res) => {
-  try {
-    const ministerioId = Number(req.params.id) || Number(req.body.ministerioId);
-    const voluntarioId = Number(req.body.voluntarioId);
-    if (!ministerioId || !voluntarioId) return res.status(400).json({ mensagem: 'IDs obrigatórios.' });
-
-    // validar que voluntário não excede limite de ministérios (regras: até 2)
-    const count = await prisma.usuarioMinisterio.count({ where: { usuarioId: voluntarioId } });
-    if (count >= 2) return res.status(400).json({ mensagem: 'Voluntário já participa de 2 ministérios.' });
-
-    // impedir duplicata
-    const existente = await prisma.usuarioMinisterio.findUnique({
-      where: { usuarioId_ministerioId: { usuarioId: voluntarioId, ministerioId } }
-    });
-    if (existente) return res.status(200).json({ mensagem: 'Voluntário já faz parte desse ministério.' });
-
-    const rel = await prisma.usuarioMinisterio.create({
-      data: { usuarioId: voluntarioId, ministerioId }
-    });
-    return res.status(201).json(rel);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ mensagem: 'Erro ao adicionar voluntário.' });
+    return res.status(500).json({ mensagem: 'Erro ao remover ministério.', detalhe: error.message });
   }
 };
 

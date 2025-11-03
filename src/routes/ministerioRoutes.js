@@ -1,13 +1,12 @@
 // src/routes/ministerioRoutes.js
 const express = require('express');
 const router = express.Router();
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
 const { verificarToken } = require('../middleware/authMiddleware');
 const authorizeAdmin = require('../middleware/authorizeAdmin');
+const verificarLiderDoMinisterio = require('../middleware/verificarLiderDoMinisterio');
+
 const ministerioController = require('../controllers/ministerioController');
 const escalaController = require('../controllers/escalaController');
-const verificarLiderDoMinisterio = require('../middleware/verificarLiderDoMinisterio');
 
 // Criar ministério
 router.post('/', verificarToken, authorizeAdmin, ministerioController.criarMinisterio);
@@ -24,7 +23,10 @@ router.post('/:id/aprovar-voluntario', verificarToken, ministerioController.apro
 // Rota para voluntário solicitar ingresso (usa verificarToken)
 router.post('/solicitar', verificarToken, ministerioController.solicitarIngresso);
 
-// rota para criar escala no ministério (líder ou admin)
+// criar escala (LIDER do ministério ou ADMIN)
 router.post('/:id/escalas', verificarToken, verificarLiderDoMinisterio, escalaController.criarEscalaPorLider);
+
+// rota para confirmar presença (voluntário)
+router.post('/:ministerioId/escalas/:escalaId/presenca', verificarToken, escalaController.confirmarPresenca);
 
 module.exports = router;

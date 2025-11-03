@@ -6,16 +6,26 @@ const JWT_SECRET = process.env.JWT_SECRET;
 require('dotenv').config();
 
 // Função de registro
-const register = async (req, res) => {
-  const { nome, email, senha, tipo } = req.body;
+exports.register = async (req, res) => {
   try {
+    const { nome, email, senha, tipo = 'voluntario' } = req.body || {};
+    if (!nome) return res.status(400).json({ mensagem: 'Nome é obrigatório.' });
+    if (!email) return res.status(400).json({ mensagem: 'Email é obrigatório.' });
+    if (!senha || senha.length < 8) return res.status(400).json({ mensagem: 'Senha deve ter pelo menos 8 caracteres.' });
+
+    // email único
+    const exists = await prisma.usuario.findUnique({ where: { email } });
+    if (exists) return res.status(400).json({ mensagem: 'Email já cadastrado.' });
+
     const senhaHash = await bcrypt.hash(senha, 10);
-    const novoUsuario = await prisma.usuario.create({
-      data: { nome, email, senhaHash, tipo }
+    const usuario = await prisma.usuario.create({
+      data: { nome, email, senhaHash, tipo: tipo.toString().toLowerCase() }
     });
-    res.status(201).json(novoUsuario);
+
+    return res.status(201).json({ id: usuario.id, nome: usuario.nome, email: usuario.email, tipo: usuario.tipo });
   } catch (error) {
-    res.status(500).json({ mensagem: 'Erro ao registrar usuário', erro: error.message });
+    console.error('register:', error);
+    return res.status(500).json({ mensagem: 'Erro ao cadastrar usuário.', detalhe: error.message });
   }
 };
 
@@ -160,9 +170,9 @@ const deleteUsuario = async (req, res) => {
 };
 
 module.exports = {
-  register,
+  register: exports.register,
   login,
-  getUsuarioAutenticado,  
+  getUsuarioAutenticado,
   createUsuario,
   getUsuarios,
   getUsuarioById,
