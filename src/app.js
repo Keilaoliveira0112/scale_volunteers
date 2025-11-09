@@ -11,6 +11,8 @@ const usuarioRoutes = require('./routes/usuarioRoutes');
 const ministerioRoutes = require('./routes/ministerioRoutes');
 const voluntarioRoutes = require('./routes/voluntarioRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // << adicionar se faltar
+const liderRoutes = require('./routes/liderRoutes');
+const escalaRoutes = require('./routes/escalaRoutes');
 
 app.use(express.json());
 app.use(cors());
@@ -28,5 +30,7 @@ app.use('/ministerios', ministerioRoutes);
 app.use('/voluntario', voluntarioRoutes);
 app.use('/usuarios', usuarioRoutes);
 app.use('/protected', protectedRoutes);
+app.use('/lider', liderRoutes);
+app.use('/escala', escalaRoutes);
 
 module.exports = app;

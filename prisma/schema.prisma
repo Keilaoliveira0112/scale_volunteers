@@ -8,36 +8,32 @@ datasource db {
 }
 
 model Usuario {
-  id           Int                 @id @default(autoincrement())
-  nome         String
-  email        String              @unique
-  senhaHash    String
-  tipo         Role
-  criadoEm     DateTime            @default(now())
-  atualizadoEm DateTime            @updatedAt @default(now())
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senhaHash String
+  tipo      String   @default("voluntario")
+  role      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // Relações
-  ministeriosLiderados Ministerio[]     @relation("LiderMinisterio")
   ministerios          UsuarioMinisterio[]
-  escalas              EscalaVoluntario[]
+  escalasDesignadas    EscalaVoluntario[]  @relation("UsuarioEscalas")
+  ministeriosLiderados Ministerio[]        @relation("LiderMinisterio")
 }
 
-// ...existing code...
-
 model Ministerio {
-  id        Int    @id @default(autoincrement())
-  nome      String
-  descricao String?
-  liderId   Int
-  lider     Usuario @relation("LiderMinisterio", fields: [liderId], references: [id])
+  id           Int                 @id @default(autoincrement())
+  nome         String
+  descricao    String?
+  liderId      Int
+  lider        Usuario             @relation("LiderMinisterio", fields: [liderId], references: [id])
+  usuarios     UsuarioMinisterio[]
+  escalas      Escala[]
+  criadoEm     DateTime            @default(now())
+  atualizadoEm DateTime            @updatedAt
 
-  // Voluntários nesse ministério
-  usuarios UsuarioMinisterio[]
-
-  escalas Escala[]
-
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
+  @@index([liderId])
 }
 
 enum MembershipStatus {
@@ -47,41 +43,46 @@ enum MembershipStatus {
 }
 
 model UsuarioMinisterio {
-  id           Int @id @default(autoincrement())
+  id           Int              @id @default(autoincrement())
   usuarioId    Int
   ministerioId Int
   status       MembershipStatus @default(PENDENTE)
-  criadoEm     DateTime @default(now())
+  criadoEm     DateTime         @default(now())
 
-  usuario    Usuario    @relation(fields: [usuarioId], references: [id])
-  ministerio Ministerio @relation(fields: [ministerioId], references: [id])
+  usuario    Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  ministerio Ministerio @relation(fields: [ministerioId], references: [id], onDelete: Cascade)
 
   @@unique([usuarioId, ministerioId])
+  @@index([usuarioId])
+  @@index([ministerioId])
 }
 
 model Escala {
-  id           Int        @id @default(autoincrement())
+  id           Int                @id @default(autoincrement())
   dataHora     DateTime
   ministerioId Int
-  ministerio   Ministerio @relation(fields: [ministerioId], references: [id])
-  voluntarios  EscalaVoluntario[]
+  ministerio   Ministerio         @relation(fields: [ministerioId], references: [id], onDelete: Cascade)
+  voluntarios  EscalaVoluntario[] @relation("EscalaVoluntarios")
+  criadoEm     DateTime           @default(now())
+  atualizadoEm DateTime           @updatedAt
 
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
+  @@index([ministerioId])
 }
 
 model EscalaVoluntario {
-  id               Int      @id @default(autoincrement())
-  escalaId         Int
-  voluntarioId     Int
-  presenteConfirmado Boolean @default(false)
+  id                 Int      @id @default(autoincrement())
+  escalaId           Int
+  voluntarioId       Int
+  presenteConfirmado Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  escala     Escala   @relation(fields: [escalaId], references: [id])
-  voluntario Usuario  @relation(fields: [voluntarioId], references: [id])
-
-  criadoEm DateTime @default(now())
+  escala     Escala  @relation("EscalaVoluntarios", fields: [escalaId], references: [id], onDelete: Cascade)
+  voluntario Usuario @relation("UsuarioEscalas", fields: [voluntarioId], references: [id], onDelete: Cascade)
 
   @@unique([escalaId, voluntarioId])
+  @@index([escalaId])
+  @@index([voluntarioId])
 }
 
 enum Role {
