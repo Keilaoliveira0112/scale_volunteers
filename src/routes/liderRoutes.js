@@ -1,17 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { verificarToken } = require('../middleware/authMiddleware');
-const verificarLiderDoMinisterio = require('../middleware/verificarLiderDoMinisterio');
-const ministerioController = require('../controllers/ministerioController');
-const escalaController = require('../controllers/escalaController');
+const liderController = require('../controllers/liderController');
 
-// Aprovar solicitação (ex.: body { voluntarioId } ou requestId)
-router.post('/ministerios/:id/aprovar-voluntario', verificarToken, verificarLiderDoMinisterio, ministerioController.aprovarVoluntario);
+// Criar escala (líder)
+router.post('/escala', verificarToken, liderController.criarEscala);
 
-// Criar escala apenas no ministério que lidera
-router.post('/ministerios/:id/escalas', verificarToken, verificarLiderDoMinisterio, escalaController.criarEscalaPorLider);
-
-// Validar presença de voluntário (marcar presença)
-router.post('/escalas/:escalaId/presenca', verificarToken, escalaController.validarPresenca);
+// Listar escalas do ministério (líder)
+router.get('/escalas/:ministerioId', verificarToken, liderController.listarEscalas);
 
 module.exports = router;
