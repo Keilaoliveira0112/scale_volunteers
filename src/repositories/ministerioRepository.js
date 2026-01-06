@@ -1,53 +1,139 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-module.exports = {
-  async criarMinisterio(dados) {
-    return prisma.ministerio.create({ data: dados });
-  },
-
-  async buscarTodos() {
-    return prisma.ministerio.findMany();
-  },
-
-  async buscarPorId(id) {
-    return prisma.ministerio.findUnique({ where: { id } });
-  },
-
-  async editarMinisterio(id, dados) {
-    return prisma.ministerio.update({ where: { id }, data: dados });
-  },
-
-  async deletarMinisterio(id) {
-    return prisma.ministerio.delete({ where: { id } });
-  },
-
-  async verificarVinculo(usuarioId, ministerioId) {
-    return prisma.usuarioMinisterio.findFirst({
-      where: { usuarioId, ministerioId }
-    });
-  },
-
-  async adicionarVoluntario(usuarioId, ministerioId) {
-    return prisma.usuarioMinisterio.create({
-      data: { usuarioId, ministerioId, status: 'APROVADO' }
-    });
-  },
-
-  async aprovarVoluntario(usuarioId, ministerioId) {
-    const existe = await this.verificarVinculo(usuarioId, ministerioId);
-    if (existe) {
-      return prisma.usuarioMinisterio.update({
-        where: { id: existe.id },
-        data: { status: 'APROVADO' }
-      });
-    }
-    return this.adicionarVoluntario(usuarioId, ministerioId);
-  },
-
-  async solicitarIngresso(usuarioId, ministerioId) {
-    return prisma.usuarioMinisterio.create({
-      data: { usuarioId, ministerioId, status: 'PENDENTE' }
+class MinisterioRepository {
+  /**
+   * Criar novo ministério
+   */
+  async criar(dados) {
+    return prisma.ministerio.create({
+      data: dados,
+      include: {
+        lider: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        }
+      }
     });
   }
-};
+
+  /**
+   * Buscar ministério por ID
+   */
+  async buscarPorId(id) {
+    return prisma.ministerio.findUnique({
+      where: { id },
+      include: {
+        lider: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        },
+        usuarios: true,
+        escalas: true
+      }
+    });
+  }
+
+  /**
+   * Buscar ministério por nome
+   */
+  async buscarPorNome(nome) {
+    return prisma.ministerio.findFirst({
+      where: { nome }
+    });
+  }
+
+  /**
+   * Listar todos os ministérios
+   */
+  async listarTodos() {
+    return prisma.ministerio.findMany({
+      include: {
+        lider: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        },
+        usuarios: true,
+        escalas: true
+      }
+    });
+  }
+
+  /**
+   * Listar ministérios por líder
+   */
+  async listarPorLider(liderId) {
+    return prisma.ministerio.findMany({
+      where: { liderId },
+      include: {
+        lider: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        },
+        usuarios: true,
+        escalas: true
+      }
+    });
+  }
+
+  /**
+   * Atualizar ministério
+   */
+  async atualizar(id, dados) {
+    return prisma.ministerio.update({
+      where: { id },
+      data: dados,
+      include: {
+        lider: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Deletar ministério
+   */
+  async deletar(id) {
+    return prisma.ministerio.delete({
+      where: { id }
+    });
+  }
+
+  /**
+   * Buscar voluntários do ministério
+   */
+  async buscarVoluntarios(ministerioId) {
+    return prisma.usuarioMinisterio.findMany({
+      where: { ministerioId },
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            email: true,
+            tipo: true
+          }
+        }
+      }
+    });
+  }
+}
+
+module.exports = new MinisterioRepository();

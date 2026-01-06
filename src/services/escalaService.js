@@ -1,27 +1,53 @@
-
 // services/escalaService.js
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const escalaRepository = require("../repositories/escalaRepository");
 
-async function criarEscala(data, usuario) {
-  // Regra 1: só admin ou líder pode criar
-  if (usuario.role !== "admin" && usuario.role !== "lider") {
-    throw new Error("Apenas admin ou líder podem criar escalas");
-  }
-
-  // Regra 2: voluntário só pode estar em até 2 ministérios
-  if (data.voluntarioId) {
-    const ministerios = await prisma.ministerioVoluntario.count({
-      where: { voluntarioId: data.voluntarioId },
-    });
-
-    if (ministerios >= 2) {
-      throw new Error("Voluntário já pertence a 2 ministérios");
+const escalaService = {
+  criarEscala: async (data, usuario) => {
+    // Regra 1: só admin ou líder pode criar
+    if (usuario.tipo !== "admin" && usuario.tipo !== "lider") {
+      throw new Error("Apenas admin ou líder podem criar escalas");
     }
+
+    return await escalaRepository.criar(data);
+  },
+
+  buscarPorId: async (id) => {
+    const escala = await escalaRepository.buscarPorId(id);
+    if (!escala) throw new Error("Escala não encontrada");
+    return escala;
+  },
+
+  listarTodas: async () => {
+    return await escalaRepository.listarTodas();
+  },
+
+  listarPorMinisterio: async (ministerioId) => {
+    return await escalaRepository.listarPorMinisterio(ministerioId);
+  },
+
+  listarPorVoluntario: async (voluntarioId) => {
+    return await escalaRepository.listarPorVoluntario(voluntarioId);
+  },
+
+  atualizar: async (id, dados) => {
+    const escala = await escalaRepository.buscarPorId(id);
+    if (!escala) throw new Error("Escala não encontrada");
+    return await escalaRepository.atualizar(id, dados);
+  },
+
+  deletar: async (id) => {
+    const escala = await escalaRepository.buscarPorId(id);
+    if (!escala) throw new Error("Escala não encontrada");
+    return await escalaRepository.deletar(id);
+  },
+
+  adicionarVoluntario: async (escalaId, voluntarioId) => {
+    return await escalaRepository.adicionarVoluntario(escalaId, voluntarioId);
+  },
+
+  verificarConflito: async (voluntarioId, dataInicio, dataFim) => {
+    return await escalaRepository.verificarConflito(voluntarioId, dataInicio, dataFim);
   }
+};
 
-  // Criar escala
-  return await prisma.escala.create({ data });
-}
-
-module.exports = { criarEscala };
+module.exports = escalaService;

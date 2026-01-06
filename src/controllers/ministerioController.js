@@ -4,6 +4,52 @@ const prisma = new PrismaClient();
 const ministerioService = require('../services/ministerioService');
 
 /**
+ * Listar todos os ministérios
+ */
+exports.listarMinisterios = async (req, res) => {
+  try {
+    const ministerios = await prisma.ministerio.findMany({
+      include: {
+        lider: {
+          select: { id: true, nome: true, email: true }
+        }
+      }
+    });
+    return res.json(ministerios);
+  } catch (error) {
+    console.error('listarMinisterios - erro:', error);
+    return res.status(500).json({ mensagem: 'Erro ao listar ministérios.' });
+  }
+};
+
+/**
+ * Obter ministério por ID
+ */
+exports.obterMinisterio = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    
+    const ministerio = await prisma.ministerio.findUnique({
+      where: { id },
+      include: {
+        lider: {
+          select: { id: true, nome: true, email: true }
+        }
+      }
+    });
+
+    if (!ministerio) {
+      return res.status(404).json({ mensagem: 'Ministério não encontrado.' });
+    }
+
+    return res.json(ministerio);
+  } catch (error) {
+    console.error('obterMinisterio - erro:', error);
+    return res.status(500).json({ mensagem: 'Erro ao obter ministério.' });
+  }
+};
+
+/**
  * Criar um novo ministério
  */
 exports.criarMinisterio = async (req, res) => {
@@ -237,5 +283,40 @@ exports.listarVoluntarios = async (req, res) => {
   } catch (error) {
     console.error('listarVoluntarios - erro:', error);
     return res.status(500).json({ mensagem: 'Erro ao listar voluntários.' });
+  }
+};
+
+/**
+ * Rejeitar voluntário no ministério
+ */
+exports.rejeitarVoluntario = async (req, res) => {
+  try {
+    const ministerioId = Number(req.params.id);
+    const { usuarioId } = req.body;
+
+    if (!usuarioId) {
+      return res.status(400).json({ mensagem: 'usuarioId é obrigatório.' });
+    }
+
+    const vinculo = await prisma.usuarioMinisterio.findFirst({
+      where: { usuarioId: Number(usuarioId), ministerioId }
+    });
+
+    if (!vinculo) {
+      return res.status(404).json({ mensagem: 'Solicitação não encontrada.' });
+    }
+
+    const atualizado = await prisma.usuarioMinisterio.update({
+      where: { id: vinculo.id },
+      data: { status: 'REJEITADO' }
+    });
+
+    return res.json({
+      mensagem: 'Voluntário rejeitado com sucesso!',
+      vinculo: atualizado
+    });
+  } catch (error) {
+    console.error('rejeitarVoluntario - erro:', error);
+    return res.status(400).json({ mensagem: error.message });
   }
 };
