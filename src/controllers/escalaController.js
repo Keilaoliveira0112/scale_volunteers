@@ -164,3 +164,160 @@ exports.listarEscalas = async (req, res) => {
     return res.status(500).json({ mensagem: 'Erro ao listar escalas.' });
   }
 };
+
+/**
+ * Obter escala por ID
+ */
+exports.obterEscala = async (req, res) => {
+  try {
+    const escalaId = Number(req.params.id);
+    
+    if (!escalaId) {
+      return res.status(400).json({ mensagem: 'ID da escala é obrigatório.' });
+    }
+
+    const escala = await prisma.escala.findUnique({
+      where: { id: escalaId },
+      include: { ministerio: true, voluntarios: { include: { voluntario: true } } }
+    });
+
+    if (!escala) {
+      return res.status(404).json({ mensagem: 'Escala não encontrada.' });
+    }
+
+    return res.json(escala);
+  } catch (error) {
+    console.error('obterEscala - erro:', error);
+    return res.status(500).json({ mensagem: 'Erro ao obter escala.' });
+  }
+};
+
+/**
+ * Editar escala
+ */
+exports.editarEscala = async (req, res) => {
+  try {
+    const escalaId = Number(req.params.id);
+    const { dataHora } = req.body;
+
+    if (!escalaId) {
+      return res.status(400).json({ mensagem: 'ID da escala é obrigatório.' });
+    }
+
+    const escala = await prisma.escala.findUnique({ where: { id: escalaId } });
+    if (!escala) {
+      return res.status(404).json({ mensagem: 'Escala não encontrada.' });
+    }
+
+    const atualizada = await prisma.escala.update({
+      where: { id: escalaId },
+      data: {
+        ...(dataHora && { dataHora: new Date(dataHora) })
+      },
+      include: { ministerio: true, voluntarios: true }
+    });
+
+    return res.json({
+      mensagem: 'Escala atualizada com sucesso!',
+      escala: atualizada
+    });
+  } catch (error) {
+    console.error('editarEscala - erro:', error);
+    return res.status(400).json({ mensagem: error.message });
+  }
+};
+
+/**
+ * Deletar escala
+ */
+exports.deletarEscala = async (req, res) => {
+  try {
+    const escalaId = Number(req.params.id);
+
+    if (!escalaId) {
+      return res.status(400).json({ mensagem: 'ID da escala é obrigatório.' });
+    }
+
+    const escala = await prisma.escala.findUnique({ where: { id: escalaId } });
+    if (!escala) {
+      return res.status(404).json({ mensagem: 'Escala não encontrada.' });
+    }
+
+    await prisma.escalaVoluntario.deleteMany({ where: { escalaId } });
+    await prisma.escala.delete({ where: { id: escalaId } });
+
+    return res.json({ mensagem: 'Escala deletada com sucesso!' });
+  } catch (error) {
+    console.error('deletarEscala - erro:', error);
+    return res.status(400).json({ mensagem: error.message });
+  }
+};
+
+/**
+ * Adicionar voluntário à escala
+ */
+exports.adicionarVoluntarioEscala = async (req, res) => {
+  try {
+    const escalaId = Number(req.params.id);
+    const { voluntarioId } = req.body;
+
+    if (!escalaId || !voluntarioId) {
+      return res.status(400).json({ mensagem: 'escalaId e voluntarioId são obrigatórios.' });
+    }
+
+    const escala = await prisma.escala.findUnique({ where: { id: escalaId } });
+    if (!escala) {
+      return res.status(404).json({ mensagem: 'Escala não encontrada.' });
+    }
+
+    const voluntario = await prisma.usuario.findUnique({ where: { id: Number(voluntarioId) } });
+    if (!voluntario) {
+      return res.status(404).json({ mensagem: 'Voluntário não encontrado.' });
+    }
+
+    const adicionado = await prisma.escalaVoluntario.create({
+      data: {
+        escalaId,
+        voluntarioId: Number(voluntarioId)
+      },
+      include: { voluntario: true }
+    });
+
+    return res.status(201).json({
+      mensagem: 'Voluntário adicionado à escala!',
+      escalaVoluntario: adicionado
+    });
+  } catch (error) {
+    console.error('adicionarVoluntarioEscala - erro:', error);
+    return res.status(400).json({ mensagem: error.message });
+  }
+};
+
+/**
+ * Remover voluntário da escala
+ */
+exports.removerVoluntarioEscala = async (req, res) => {
+  try {
+    const escalaId = Number(req.params.id);
+    const voluntarioId = Number(req.params.voluntarioId);
+
+    if (!escalaId || !voluntarioId) {
+      return res.status(400).json({ mensagem: 'escalaId e voluntarioId são obrigatórios.' });
+    }
+
+    const escalaVoluntario = await prisma.escalaVoluntario.findFirst({
+      where: { escalaId, voluntarioId }
+    });
+
+    if (!escalaVoluntario) {
+      return res.status(404).json({ mensagem: 'Voluntário não está nesta escala.' });
+    }
+
+    await prisma.escalaVoluntario.delete({ where: { id: escalaVoluntario.id } });
+
+    return res.json({ mensagem: 'Voluntário removido da escala com sucesso!' });
+  } catch (error) {
+    console.error('removerVoluntarioEscala - erro:', error);
+    return res.status(400).json({ mensagem: error.message });
+  }
+};

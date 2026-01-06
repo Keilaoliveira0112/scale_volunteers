@@ -182,3 +182,155 @@ exports.listarEscalas = async (req, res) => {
     return res.status(500).json({ mensagem: 'Erro ao listar escalas.' });
   }
 };
+
+/**
+ * Adicionar voluntário ao ministério (líder)
+ */
+exports.adicionarVoluntario = async (req, res) => {
+  try {
+    const ministerioId = Number(req.params.ministerioId);
+    const { voluntarioId } = req.body;
+    const liderId = req.usuario?.id;
+
+    if (!ministerioId || !voluntarioId) {
+      return res.status(400).json({ mensagem: 'ministerioId e voluntarioId são obrigatórios.' });
+    }
+
+    const ministerio = await prisma.ministerio.findUnique({ where: { id: ministerioId } });
+    if (!ministerio) {
+      return res.status(404).json({ mensagem: 'Ministério não encontrado.' });
+    }
+
+    if (ministerio.liderId !== liderId) {
+      return res.status(403).json({ mensagem: 'Você não é líder deste ministério.' });
+    }
+
+    const vinculo = await prisma.usuarioMinisterio.create({
+      data: { usuarioId: Number(voluntarioId), ministerioId, status: 'PENDENTE' },
+      include: { usuario: true, ministerio: true }
+    });
+
+    return res.status(201).json({
+      mensagem: 'Voluntário adicionado com sucesso!',
+      vinculo
+    });
+  } catch (error) {
+    console.error('adicionarVoluntario - erro:', error);
+    return res.status(400).json({ mensagem: error.message });
+  }
+};
+
+/**
+ * Listar voluntários do ministério (líder)
+ */
+exports.listarVoluntarios = async (req, res) => {
+  try {
+    const ministerioId = Number(req.params.ministerioId);
+    const liderId = req.usuario?.id;
+
+    const ministerio = await prisma.ministerio.findUnique({ where: { id: ministerioId } });
+    if (!ministerio) {
+      return res.status(404).json({ mensagem: 'Ministério não encontrado.' });
+    }
+
+    if (ministerio.liderId !== liderId) {
+      return res.status(403).json({ mensagem: 'Você não é líder deste ministério.' });
+    }
+
+    const voluntarios = await prisma.usuarioMinisterio.findMany({
+      where: { ministerioId },
+      include: {
+        usuario: {
+          select: { id: true, nome: true, email: true }
+        }
+      }
+    });
+
+    return res.json(voluntarios);
+  } catch (error) {
+    console.error('listarVoluntarios - erro:', error);
+    return res.status(500).json({ mensagem: 'Erro ao listar voluntários.' });
+  }
+};
+
+/**
+ * Aprovar voluntário (líder)
+ */
+exports.aprovarVoluntario = async (req, res) => {
+  try {
+    const ministerioId = Number(req.params.ministerioId);
+    const usuarioId = Number(req.params.usuarioId);
+    const liderId = req.usuario?.id;
+
+    const ministerio = await prisma.ministerio.findUnique({ where: { id: ministerioId } });
+    if (!ministerio) {
+      return res.status(404).json({ mensagem: 'Ministério não encontrado.' });
+    }
+
+    if (ministerio.liderId !== liderId) {
+      return res.status(403).json({ mensagem: 'Você não é líder deste ministério.' });
+    }
+
+    const vinculo = await prisma.usuarioMinisterio.findFirst({
+      where: { usuarioId, ministerioId }
+    });
+
+    if (!vinculo) {
+      return res.status(404).json({ mensagem: 'Solicitação não encontrada.' });
+    }
+
+    const atualizado = await prisma.usuarioMinisterio.update({
+      where: { id: vinculo.id },
+      data: { status: 'APROVADO' }
+    });
+
+    return res.json({
+      mensagem: 'Voluntário aprovado com sucesso!',
+      vinculo: atualizado
+    });
+  } catch (error) {
+    console.error('aprovarVoluntario - erro:', error);
+    return res.status(400).json({ mensagem: error.message });
+  }
+};
+
+/**
+ * Rejeitar voluntário (líder)
+ */
+exports.rejeitarVoluntario = async (req, res) => {
+  try {
+    const ministerioId = Number(req.params.ministerioId);
+    const usuarioId = Number(req.params.usuarioId);
+    const liderId = req.usuario?.id;
+
+    const ministerio = await prisma.ministerio.findUnique({ where: { id: ministerioId } });
+    if (!ministerio) {
+      return res.status(404).json({ mensagem: 'Ministério não encontrado.' });
+    }
+
+    if (ministerio.liderId !== liderId) {
+      return res.status(403).json({ mensagem: 'Você não é líder deste ministério.' });
+    }
+
+    const vinculo = await prisma.usuarioMinisterio.findFirst({
+      where: { usuarioId, ministerioId }
+    });
+
+    if (!vinculo) {
+      return res.status(404).json({ mensagem: 'Solicitação não encontrada.' });
+    }
+
+    const atualizado = await prisma.usuarioMinisterio.update({
+      where: { id: vinculo.id },
+      data: { status: 'REJEITADO' }
+    });
+
+    return res.json({
+      mensagem: 'Voluntário rejeitado com sucesso!',
+      vinculo: atualizado
+    });
+  } catch (error) {
+    console.error('rejeitarVoluntario - erro:', error);
+    return res.status(400).json({ mensagem: error.message });
+  }
+};

@@ -1,0 +1,743 @@
+{
+  "info": {
+    "name": "Scale Volunteers API",
+    "description": "Testes completos da API de gerenciamento de escalas de voluntários",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 AUTENTICAÇÃO",
+      "item": [
+        {
+          "name": "Register - Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Admin User\",\n  \"email\": \"admin@example.com\",\n  \"senha\": \"senha123\",\n  \"tipo\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register - Líder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Lider User\",\n  \"email\": \"lider@example.com\",\n  \"senha\": \"senha123\",\n  \"tipo\": \"lider\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register - Voluntário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Voluntario User\",\n  \"email\": \"voluntario@example.com\",\n  \"senha\": \"senha123\",\n  \"tipo\": \"voluntario\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login - Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"senha\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Líder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lider@example.com\",\n  \"senha\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Voluntário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"voluntario@example.com\",\n  \"senha\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Obter Perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/perfil",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "perfil"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Admin User Updated\",\n  \"email\": \"admin.novo@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/perfil",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "perfil"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 USUÁRIOS",
+      "item": [
+        {
+          "name": "Listar Todos (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Obter Usuário por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/1",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Usuário",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/3",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "3"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⛪ MINISTÉRIOS",
+      "item": [
+        {
+          "name": "Listar Todos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ministerios",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios"]
+            }
+          }
+        },
+        {
+          "name": "Obter Ministério por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ministerios/1",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Criar Ministério (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Louvor\",\n  \"descricao\": \"Ministério de louvor e adoração\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ministerios",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios"]
+            }
+          }
+        },
+        {
+          "name": "Criar Ministério 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Visitação\",\n  \"descricao\": \"Ministério de visitação aos enfermos\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ministerios",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios"]
+            }
+          }
+        },
+        {
+          "name": "Editar Ministério",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Louvor Atualizado\",\n  \"descricao\": \"Nova descrição\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ministerios/1",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Atribuir Líder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"liderId\": 2,\n  \"force\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ministerios/1/atribuir-lider",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios", "1", "atribuir-lider"]
+            }
+          }
+        },
+        {
+          "name": "Adicionar Voluntário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{lider_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"voluntarioId\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ministerios/1/voluntarios",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios", "1", "voluntarios"]
+            }
+          }
+        },
+        {
+          "name": "Listar Voluntários",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{lider_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ministerios/1/voluntarios",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios", "1", "voluntarios"]
+            }
+          }
+        },
+        {
+          "name": "Aprovar Voluntário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{lider_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ministerios/1/aprovar-voluntario",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios", "1", "aprovar-voluntario"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Ministério",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ministerios/2",
+              "host": ["{{base_url}}"],
+              "path": ["ministerios", "2"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 ESCALAS",
+      "item": [
+        {
+          "name": "Criar Escala",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ministerioId\": 1,\n  \"dataHora\": \"2026-01-20T19:00:00Z\",\n  \"voluntarios\": [3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/escalas",
+              "host": ["{{base_url}}"],
+              "path": ["escalas"]
+            }
+          }
+        },
+        {
+          "name": "Listar Escalas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/escalas",
+              "host": ["{{base_url}}"],
+              "path": ["escalas"]
+            }
+          }
+        },
+        {
+          "name": "Obter Escala por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/escalas/1",
+              "host": ["{{base_url}}"],
+              "path": ["escalas", "1"]
+            }
+          }
+        },
+        {
+          "name": "Confirmar Presença",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{voluntario_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"voluntarioId\": 3,\n  \"presenteConfirmado\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/escalas/1/confirmar-presenca",
+              "host": ["{{base_url}}"],
+              "path": ["escalas", "1", "confirmar-presenca"]
+            }
+          }
+        },
+        {
+          "name": "Editar Escala",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHora\": \"2026-01-21T19:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/escalas/1",
+              "host": ["{{base_url}}"],
+              "path": ["escalas", "1"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Escala",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/escalas/1",
+              "host": ["{{base_url}}"],
+              "path": ["escalas", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 ADMIN",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Listar Usuários",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "usuarios"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👨‍✝️ LÍDER",
+      "item": [
+        {
+          "name": "Criar Escala",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{lider_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ministerioId\": 1,\n  \"dataHora\": \"2026-01-22T19:00:00Z\",\n  \"voluntarios\": [3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/lider/escalas",
+              "host": ["{{base_url}}"],
+              "path": ["lider", "escalas"]
+            }
+          }
+        },
+        {
+          "name": "Listar Escalas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{lider_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/lider/escalas",
+              "host": ["{{base_url}}"],
+              "path": ["lider", "escalas"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🙏 VOLUNTÁRIO",
+      "item": [
+        {
+          "name": "Solicitar Ingresso em Ministério",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{voluntario_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ministerioId\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/voluntarios/solicitar-ministerio",
+              "host": ["{{base_url}}"],
+              "path": ["voluntarios", "solicitar-ministerio"]
+            }
+          }
+        },
+        {
+          "name": "Minhas Escalas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{voluntario_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/voluntarios/minhas-escalas",
+              "host": ["{{base_url}}"],
+              "path": ["voluntarios", "minhas-escalas"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "key": "lider_token",
+      "value": ""
+    },
+    {
+      "key": "voluntario_token",
+      "value": ""
+    }
+  ]
+}

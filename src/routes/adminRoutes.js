@@ -3,22 +3,15 @@ const router = express.Router();
 const { verificarToken } = require('../middleware/authMiddleware');
 const authorizeAdmin = require('../middleware/authorizeAdmin');
 const adminController = require('../controllers/adminController');
-const ministerioController = require('../controllers/ministerioController');
-const escalaController = require('../controllers/escalaController');
 
-// Dashboard
+// ===== DASHBOARD =====
+
+// Dashboard com estatísticas
 router.get('/dashboard', verificarToken, authorizeAdmin, adminController.getDashboard);
 
-// Usuários
-router.get('/listar-usuarios', verificarToken, authorizeAdmin, adminController.listarUsuarios);
+// ===== USUÁRIOS (ADMIN) =====
 
-// Ministérios
-router.post('/ministerios', verificarToken, authorizeAdmin, ministerioController.criarMinisterio);
-router.put('/ministerios/:id', verificarToken, authorizeAdmin, ministerioController.editarMinisterio);
-router.delete('/ministerios/:id', verificarToken, authorizeAdmin, ministerioController.removerMinisterio);
-
-// Escalas (NOVA ROTA)
-router.post('/escalas', verificarToken, authorizeAdmin, adminController.criarEscala);
-router.get('/escalas', verificarToken, authorizeAdmin, adminController.listarEscalas);
+// Listar todos os usuários
+router.get('/usuarios', verificarToken, authorizeAdmin, adminController.listarUsuarios);
 
 module.exports = router;
